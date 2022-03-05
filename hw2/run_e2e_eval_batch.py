@@ -160,8 +160,8 @@ if __name__ == "__main__":
     # Load the Model
     model = QuizBowlSystem()
 
-    # pred_dict = generate_first_sent_predictions_batch(model, eval_questions)
-    pred_dict = json.load(open(args.first_sent_predictions, 'r'))
+    pred_dict = generate_first_sent_predictions_batch(model, eval_questions)
+    #pred_dict = json.load(open(args.first_sent_predictions, 'r'))
     save_json(pred_dict, args.first_sent_predictions)
     print('Saved first sentence predictions...\n')
 
