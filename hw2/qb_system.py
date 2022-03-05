@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Union, Tuple
 from tqdm import tqdm
 from qbdata import QantaDatabase
 import torch
@@ -39,6 +39,13 @@ class QuizBowlSystem:
                 question, disable_reranking=disable_reranking)
             return page
 
+    def retrieve_page_batch(self, questions: List[str], disable_reranking=False) -> str:
+        """Retrieves the wikipedia page name for an input question."""
+        with torch.no_grad():
+            pages = self.retriever.retrieve_answer_document_batch(
+                questions, disable_reranking=disable_reranking)
+            return pages
+
     def execute_query(self, question: str, *, get_page=True) -> str:
         """Populate this method to do the following:
         1. Use the Retriever to get the top wikipedia page.
@@ -50,6 +57,18 @@ class QuizBowlSystem:
             answer = self.answer_extractor.extract_answer(
                 question, reference_text)[0]  # singleton list
             return (answer, page) if get_page else answer
+
+    def execute_query_batch(self, questions: List[str], *, get_page=True) -> Union[List[str], List[Tuple[str, str]]]:
+        """Populate this method to do the following:
+        1. Use the Retriever to get the top wikipedia page.
+        2. Tokenize the question and the passage text to prepare inputs to the Bert-based Answer Extractor
+        3. Predict an answer span for each question and return the list of corresponding answer texts."""
+        with torch.no_grad():
+            pages = self.retrieve_page_batch(questions, disable_reranking=True)
+            reference_text = list(map(lambda x: self.wiki_lookup[x]['text'], pages))
+            answers = self.answer_extractor.extract_answer_batch(
+                questions, reference_text)
+            return list(zip(answers, pages)) if get_page else answers
 
 
 if __name__ == "__main__":

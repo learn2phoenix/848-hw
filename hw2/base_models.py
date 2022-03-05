@@ -1,5 +1,6 @@
 from abc import ABC
 from typing import Optional, List, Tuple
+from torch import Tensor
 
 class BaseModel:
 
@@ -19,7 +20,11 @@ class BaseGuesser(BaseModel):
 
 
 class BaseReRanker(BaseModel):
-    def get_best_document(question: str, ref_texts: List[str]):
+
+    def get_best_document(self, question: str, ref_texts: List[str]) -> int:
+        raise NotImplementedError
+
+    def get_best_document_batch(self, questions: List[str], ref_texts: List[str]) -> Tensor:
         raise NotImplementedError
 
 
